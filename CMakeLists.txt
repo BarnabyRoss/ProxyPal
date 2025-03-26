@@ -9,4 +9,6 @@ project(ProxyPal)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)  # 强制要求编译器支持C++20
 
+include_directories(include)
 
+add_subdirectory(src)
