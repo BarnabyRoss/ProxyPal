@@ -49,7 +49,11 @@ TcpServer::TcpServer(int port){
     exit(EXIT_FAILURE);
   }
   events_.push_back(ev);
-  clients_.push_back(server_fd_);
+}
+
+void TcpServer::start(){
+
+
 }
 
 TcpServer::~TcpServer(){
@@ -84,15 +88,27 @@ void TcpServer::acceptNewConnection(){
     return;
   }
   events_.push_back(ev);
-  clients_.push_back(client_fd);
+  addConnection(client_fd, client_addr);
 }
 
 void TcpServer::closeConnection(){
 
-  for(int i = 0; i < clients_.size(); ++i){
-    close(clients_[i]);
-    clients_[i] = -1;
-  }
   close(server_fd_);
   close(epoll_fd_);
+}
+
+void TcpServer::addConnection(int fd, struct sockaddr_in client_addr){
+
+  std::shard_ptr<Connection> conn = std::make_shared<Connection>(fd, client_addr);
+
+  connections_[fd] = conn;
+}
+
+void TcpServer::removeConnection(int fd){
+
+  epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr);
+
+  connections_.erase(fd);
+
+  std::cout << "Connection close fd : " << fd << std::endl;
 }

@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
+#include <map>
 
 //辅助类
 class Connection{
@@ -82,7 +83,12 @@ public:
   void appendToWriteBuffer(const std::string& data) { write_buffer_ += data; }
   bool hasDataToWrite() const { return !write_buffer_.empty(); }
 
-  ~Connection() { close(socket_fd_); }
+  ~Connection(){
+    if( socket_fd_ != -1 ){
+      close(socket_fd_);
+      socket_fd_ = -1;
+    }
+  }
 
 };
 
@@ -92,12 +98,12 @@ private:
   int epoll_fd_;
   int server_fd_;
   std::vector<struct epoll_event> events_;
-  std::vector<int> clients_;
+  std::map< int, std::shard_ptr<Connection> > connections_;   //管理所有客户端连接
 
 public:
   TcpServer(int port);
 
-
+  void start();
 
   ~TcpServer();
 
@@ -105,6 +111,10 @@ private:
   void setNonBlocking(int fd);
   void acceptNewConnection();
   void closeConnection();
+
+  //连接管理
+  void addConnection(int fd, struct sockaddr_in client_addr);
+  void removeConnection(int fd);
 
 };
 
