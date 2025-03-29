@@ -101,6 +101,7 @@ private:
   int server_fd_;
   std::vector<struct epoll_event> events_;
   std::map< int, std::shard_ptr<Connection> > connections_;   //管理所有客户端连接
+  bool running;
 
 public:
   TcpServer(int port);
@@ -118,7 +119,7 @@ private:
   void removeConnection(int fd);
 
   //事件管理
-  void handleEvent();
+  void handleEvents();
   void handleRead(int fd);
   void handleWrite(int fd);
   void handleError(int fd);

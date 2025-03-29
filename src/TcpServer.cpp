@@ -53,7 +53,12 @@ TcpServer::TcpServer(int port) : events_(MAX_EVENTS){
 
 void TcpServer::start(){
 
+  running = true;
 
+  while( running ){
+
+    handleEvents();
+  }
 }
 
 TcpServer::~TcpServer(){
@@ -113,7 +118,7 @@ void TcpServer::removeConnection(int fd){
   std::cout << "Connection close fd : " << fd << std::endl;
 }
 
-void TcpServer::handleEvent(){
+void TcpServer::handleEvents(){
 
   int active = epoll_wait(epoll_fd_, events_.data(), MAX_EVENTS, -1);
   if( active < 0 ){
