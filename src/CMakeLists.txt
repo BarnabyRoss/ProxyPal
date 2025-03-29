@@ -1,2 +1,2 @@
 
-add_executable(ProxyPal main.cpp TcpServer.cpp)
+add_executable(ProxyPal main.cpp TcpServer.cpp HttpParser.cpp)
