@@ -27,7 +27,7 @@ private:
   std::string write_buffer_;
 
 public:
-  Connection(int fd, const struct sockaddr_in& addr) : client_fd_(fd), client_addr_(addr) {}
+  Connection(int fd, const struct sockaddr_in& addr) : client_fd_(fd), client_addr_(addr), write_buffer_.clear() {}
 
   //核心功能
   bool readData(){
