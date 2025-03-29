@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <cstring>
 #include <map>
+#include <functional>
 
 #define MAX_EVENTS 128
 
@@ -96,17 +97,22 @@ public:
 
 class TcpServer{
 
+public:
+  using CallBack = std::function<void(std::shared_ptr<Connection>, const std::string&)>;
+
 private:
   int epoll_fd_;
   int server_fd_;
   std::vector<struct epoll_event> events_;
   std::map< int, std::shard_ptr<Connection> > connections_;   //管理所有客户端连接
   bool running;
+  CallBack message_callback_;
 
 public:
   TcpServer(int port);
 
   void start();
+  void setMessageCallBack(CallBack cb){ message_callback_ = std::move(cb); }
 
   ~TcpServer();
 

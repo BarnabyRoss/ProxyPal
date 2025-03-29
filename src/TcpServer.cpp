@@ -156,6 +156,10 @@ void TcpServer::handleRead(int fd){
     removeConnection(fd);
     return;
   }
+
+  if( message_callback_ && !conn->getReadBuffer().empty() ){
+    message_callback_(conn, conn->getReadBuffer());
+  }
 }
 
 void TcpServer::handleWrite(int fd){
