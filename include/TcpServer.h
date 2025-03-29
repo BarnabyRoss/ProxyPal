@@ -18,20 +18,20 @@
 class Connection{
 
 private:
-  int socket_fd_;
+  int client_fd_;
   struct sockaddr_in client_addr_;
   std::string read_buffer_;
   std::string write_buffer_;
 
 public:
-  Connection(int fd, const struct sockaddr_in& addr) : socket_fd_(fd), client_addr_(addr) {}
+  Connection(int fd, const struct sockaddr_in& addr) : client_fd_(fd), client_addr_(addr) {}
 
   //核心功能
   bool readData(){
 
     char temp_buffer[4096];
     memset(temp_buffer, 0, sizeof(temp_buffer));
-    int len = recv(socket_fd_, temp_buffer, sizeof(temp_buffer) - 1, 0);
+    int len = recv(client_fd_, temp_buffer, sizeof(temp_buffer) - 1, 0);
     if( len > 0 ){
       temp_buffer[len] = '\0';
       read_buffer_ += temp_buffer;
@@ -78,15 +78,15 @@ public:
   }
 
   //基本访问器
-  int getFd() const { return socket_fd_; }
+  int getFd() const { return client_fd_; }
   std::string getReadBuffer() const { return read_buffer_; }
   void appendToWriteBuffer(const std::string& data) { write_buffer_ += data; }
   bool hasDataToWrite() const { return !write_buffer_.empty(); }
 
   ~Connection(){
-    if( socket_fd_ != -1 ){
-      close(socket_fd_);
-      socket_fd_ = -1;
+    if( client_fd_ != -1 ){
+      close(client_fd_);
+      client_fd_ = -1;
     }
   }
 
@@ -109,12 +109,17 @@ public:
 
 private:
   void setNonBlocking(int fd);
-  void acceptNewConnection();
   void closeConnection();
 
   //连接管理
   void addConnection(int fd, struct sockaddr_in client_addr);
   void removeConnection(int fd);
+
+  //事件管理
+  void handleEvent();
+  void handleRead(int fd);
+  void handleWrite(int fd);
+  void acceptNewConnection();
 
 };
 

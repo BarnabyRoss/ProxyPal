@@ -112,3 +112,26 @@ void TcpServer::removeConnection(int fd){
 
   std::cout << "Connection close fd : " << fd << std::endl;
 }
+
+void TcpServer::handleEvent(){
+
+
+}
+
+void TcpServer::handleRead(int fd){
+
+  auto it = connections_.find(fd);
+  if( it == connections_end() ) return;
+
+  std::shared_ptr<Connection> conn = it->second();
+
+  if( !conn->readData() ){
+    removeConnection(fd);
+    return;
+  }
+}
+
+void TcpServer::handleWrite(int fd){
+
+
+}
