@@ -1,7 +1,7 @@
 
 #include "TcpServer.h"
 
-TcpServer::TcpServer(int port){
+TcpServer::TcpServer(int port) : events_(MAX_EVENTS){
 
   server_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if( server_fd_ < 0 ){
@@ -115,13 +115,35 @@ void TcpServer::removeConnection(int fd){
 
 void TcpServer::handleEvent(){
 
+  int active = epoll_wait(epoll_fd_, events_.data(), MAX_EVENTS, -1);
+  if( active < 0 ){
+    if( errno == EINTR ){
+      continue;
+    }else{
+      std::cerr << "epoll wait failed!" << std::endl;
+      break;
+    }
+  }
+
+  for(int i = 0; i < active; ++i){
+    size_t fd = events_[i].data.fd;
+    if( fd == server_fd_ ){ //服务端server接收到的请求事件
+      acceptNewConnection();
+    }else if( events_[i].events & EPOLLIN ){
+      handleRead(events_[i].data.fd);
+    }else if( events_[i].events & EPOLLOUT ){
+      handleWrite(events_[i].data.fd);
+    }else if( events_[i].events & (EPOLLHUP | EPOLLERR | EPOLLRDHUP) ){
+      handleError(events_[i].data.fd);
+    }
+  }
 
 }
 
 void TcpServer::handleRead(int fd){
 
   auto it = connections_.find(fd);
-  if( it == connections_end() ) return;
+  if( it == connections_.end() ) return;
 
   std::shared_ptr<Connection> conn = it->second();
 
@@ -133,5 +155,18 @@ void TcpServer::handleRead(int fd){
 
 void TcpServer::handleWrite(int fd){
 
+  auto it = connections_.find(fd);
+  if( it == connections_.end() ) return;
 
+  std::shared_ptr<Connection> conn = it->second();
+
+  if( !conn->writeData() ){
+    removeConnection(fd);
+    return;
+  }
+}
+
+void TcpServer::handleError(int fd){
+
+  removeConnection(fd);
 }

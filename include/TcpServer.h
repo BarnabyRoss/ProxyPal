@@ -14,6 +14,8 @@
 #include <cstring>
 #include <map>
 
+#define MAX_EVENTS 128
+
 //辅助类
 class Connection{
 
@@ -119,6 +121,7 @@ private:
   void handleEvent();
   void handleRead(int fd);
   void handleWrite(int fd);
+  void handleError(int fd);
   void acceptNewConnection();
 
 };
