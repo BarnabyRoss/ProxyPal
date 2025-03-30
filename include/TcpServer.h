@@ -27,7 +27,7 @@ private:
   std::string write_buffer_;
 
 public:
-  Connection(int fd, const struct sockaddr_in& addr) : client_fd_(fd), client_addr_(addr), write_buffer_.clear() {}
+  Connection(int fd, const struct sockaddr_in& addr) : client_fd_(fd), client_addr_(addr){}
 
   //核心功能
   bool readData(){
@@ -56,7 +56,7 @@ public:
 
   bool writeData(){
 
-    int len = send(socket_fd_, write_buffer_.c_str(), write_buffer_.length(), 0);
+    int len = send(client_fd_, write_buffer_.c_str(), write_buffer_.length(), 0);
     if( len > 0 ){
 
       write_buffer_.erase(0, len);
@@ -104,7 +104,7 @@ private:
   int epoll_fd_;
   int server_fd_;
   std::vector<struct epoll_event> events_;
-  std::map< int, std::shard_ptr<Connection> > connections_;   //管理所有客户端连接
+  std::map< int, std::shared_ptr<Connection> > connections_;   //管理所有客户端连接
   bool running;
   CallBack message_callback_;
 

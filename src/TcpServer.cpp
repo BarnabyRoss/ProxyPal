@@ -104,7 +104,7 @@ void TcpServer::closeConnection(){
 
 void TcpServer::addConnection(int fd, struct sockaddr_in client_addr){
 
-  std::shard_ptr<Connection> conn = std::make_shared<Connection>(fd, client_addr);
+  std::shared_ptr<Connection> conn = std::make_shared<Connection>(fd, client_addr);
 
   connections_[fd] = conn;
 }

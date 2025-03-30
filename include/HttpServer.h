@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+#include <unordered_map>
 #include "TcpServer.h"
 #include "HttpParser.h"
 #include "HttpResponse.h"
@@ -12,7 +13,7 @@
 class HttpServer{
 
 public:
-  using UrlResponse = std::unordered_map< const std::string&, std::function<HttpResponse(const HttpRequest&)> >;
+  using UrlResponse = std::unordered_map< std::string, std::function<HttpResponse(const HttpRequest&)> >;
 
 private:
   TcpServer tcpServer_;
