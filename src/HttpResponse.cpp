@@ -4,7 +4,7 @@
 
 HttpResponse::HttpResponse() : status_code_(200), status_message_("OK"){
 
-  headers_["Server"] = "SimpleHttp/1.0";
+  headers_["Server"] = "SimpleHttp/1.1";
   headers_["Connection"] = "close";
   headers_["Content-type"] = "text/html";
 }
@@ -34,7 +34,7 @@ std::string HttpResponse::toString() const{
 
   std::stringstream ss;
 
-  ss << "Http/1.1 " << status_code_ << " " << status_message_ << "\r\n";  //响应行
+  ss << "HTTP/1.1 " << status_code_ << " " << status_message_ << "\r\n";  //响应行
   
   //响应头
   for(auto& header : headers_){

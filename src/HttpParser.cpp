@@ -16,7 +16,7 @@ bool HttpParser::parseRequest(const std::string& raw_request){
     if( !parseRequestHeader(lines[i]) ) return false;
   }
 
-  if( request_.headers_.find("HOST") == request_.headers_.end() ) return false;
+  if( request_.headers_.find("Host") == request_.headers_.end() ) return false;
 
   return true;
 }

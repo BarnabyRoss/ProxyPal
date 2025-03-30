@@ -123,10 +123,10 @@ void TcpServer::handleEvents(){
   int active = epoll_wait(epoll_fd_, events_.data(), MAX_EVENTS, -1);
   if( active < 0 ){
     if( errno == EINTR ){
-      continue;
+      //continue;
     }else{
       std::cerr << "epoll wait failed!" << std::endl;
-      break;
+      //break;
     }
   }
 
@@ -150,7 +150,7 @@ void TcpServer::handleRead(int fd){
   auto it = connections_.find(fd);
   if( it == connections_.end() ) return;
 
-  std::shared_ptr<Connection> conn = it->second();
+  std::shared_ptr<Connection> conn = it->second;
 
   if( !conn->readData() ){
     removeConnection(fd);
@@ -167,7 +167,7 @@ void TcpServer::handleWrite(int fd){
   auto it = connections_.find(fd);
   if( it == connections_.end() ) return;
 
-  std::shared_ptr<Connection> conn = it->second();
+  std::shared_ptr<Connection> conn = it->second;
 
   if( !conn->writeData() ){
     removeConnection(fd);

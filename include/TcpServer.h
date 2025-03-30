@@ -14,6 +14,7 @@
 #include <cstring>
 #include <map>
 #include <functional>
+#include <memory>
 
 #define MAX_EVENTS 128
 
