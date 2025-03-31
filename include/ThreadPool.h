@@ -36,14 +36,14 @@ public:
 
         using return_type = std::invoke_result<F, Args...>;
 
-        auto task = std::make_shared< packaged_task<return_type()> >(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+        auto task = std::make_shared< std::packaged_task<return_type()> >(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 
         std::future<return_type> res = task->get_future();
 
         {
           std::unique_lock lock(queue_mutex_);
 
-          if( stop_ ) throw std;:runtime_error("thread pool stoped!");
+          if( stop_ ) throw std::runtime_error("thread pool stoped!");
 
           tasks_queue_.emplace([task](){ (*task)(); });
         }
