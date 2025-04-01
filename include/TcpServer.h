@@ -96,6 +96,14 @@ public:
 
 };
 
+struct HttpTask{
+
+std::shared_ptr<Connection> conn_;
+std::string request_data_;
+std::function<void(std::string)> complate_callback_;
+
+};
+
 class TcpServer{
 
 public:
