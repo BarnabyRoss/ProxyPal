@@ -29,7 +29,7 @@ private:
   ThreadPool thread_pool_;
 
 public:
-  HttpServer(int port);
+  HttpServer(int port, size_t threadCount = 4);
 
   void start();
   void registerHandler(const std::string& path, std::function<HttpResponse(const HttpRequest&)> handler);

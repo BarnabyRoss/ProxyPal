@@ -1,7 +1,7 @@
 
 #include "HttpServer.h"
 
-HttpServer::HttpServer(int port, size_t threadCount = 4) : tcpServer_(port), thread_pool_(threadCount){
+HttpServer::HttpServer(int port, size_t threadCount) : tcpServer_(port), thread_pool_(threadCount){
 
   tcpServer_.setMessageCallBack([this](std::shared_ptr<Connection> conn, const std::string& data){
     this->onMessage(conn, data);
@@ -37,24 +37,24 @@ void HttpServer::processRequest(HttpTask task){
     if( it != url_handles_.end() ){
 
       HttpResponse response = it->second(request);
-      conn->appendToWriteBuffer(response.toString());
-      if( conn->hasDataToWrite() )  conn->writeData();
+      task.conn_->appendToWriteBuffer(response.toString());
+      if( task.conn_->hasDataToWrite() )  task.conn_->writeData();
 
     }else{
 
-      HttpREsponse response;
-      response.setStatusCode("404");
+      HttpResponse response;
+      response.setStatusCode(404);
       response.setBody("Not Found");
-      conn->appendToWriteBuffer(response.toString());
-      if( conn->hasDataToWrite() ) conn->writeData();
+      task.conn_->appendToWriteBuffer(response.toString());
+      if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
     }
   }else{
 
     HttpResponse response;
-    response.setStatusCode("404");
+    response.setStatusCode(404);
     response.setBody("Bad Request");
-    conn->appendToWriteBuffer(response.toString());
-    if( conn->hasDataToWrite() ) conn->writeData();
+    task.conn_->appendToWriteBuffer(response.toString());
+    if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
   }
 }
 
