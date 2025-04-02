@@ -48,7 +48,7 @@ TcpServer::TcpServer(int port) : events_(MAX_EVENTS){
     close(epoll_fd_);
     exit(EXIT_FAILURE);
   }
-  events_.push_back(ev);
+  //events_.push_back(ev);
 }
 
 void TcpServer::start(){
@@ -92,7 +92,7 @@ void TcpServer::acceptNewConnection(){
     close(client_fd);
     return;
   }
-  events_.push_back(ev);
+  //events_.push_back(ev);
   addConnection(client_fd, client_addr);
 }
 
