@@ -1,7 +1,7 @@
 
 #include "HttpServer.h"
 
-HttpServer::HttpServer(int port) : tcpServer_(port){
+HttpServer::HttpServer(int port, size_t threadCount = 4) : tcpServer_(port), thread_pool_(threadCount){
 
   tcpServer_.setMessageCallBack([this](std::shared_ptr<Connection> conn, const std::string& data){
     this->onMessage(conn, data);
@@ -20,28 +20,42 @@ void HttpServer::registerHandler(const std::string& path, std::function<HttpResp
 
 void HttpServer::onMessage(std::shared_ptr<Connection> conn, const std::string& raw_data){
 
-  //使用HttpParser解析HTTP请求
-  if( parser_.parseRequest(raw_data) ){
+  HttpTask task;
+  task.conn_ = conn;
+  task.request_data_ = raw_data;
+
+  thread_pool_.enqueue(&HttpServer::processRequest, this, task);
+}
+
+void HttpServer::processRequest(HttpTask task){
+
+  if( parser_.parseRequest(task.request_data_)){
 
     HttpRequest request = parser_.getHttpRequest();
 
     auto it = url_handles_.find(request.uri_);
     if( it != url_handles_.end() ){
-      HttpResponse response = it->second(request);
 
+      HttpResponse response = it->second(request);
       conn->appendToWriteBuffer(response.toString());
-      if( conn->hasDataToWrite() ){
-        conn->writeData();
-      }
+      if( conn->hasDataToWrite() )  conn->writeData();
+
     }else{
-      
-      HttpResponse response;
-      response.setStatusCode(404);
+
+      HttpREsponse response;
+      response.setStatusCode("404");
       response.setBody("Not Found");
       conn->appendToWriteBuffer(response.toString());
       if( conn->hasDataToWrite() ) conn->writeData();
     }
+  }else{
 
+    HttpResponse response;
+    response.setStatusCode("404");
+    response.setBody("Bad Request");
+    conn->appendToWriteBuffer(response.toString());
+    if( conn->hasDataToWrite() ) conn->writeData();
   }
 }
+
 

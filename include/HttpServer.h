@@ -9,13 +9,12 @@
 #include "TcpServer.h"
 #include "HttpParser.h"
 #include "HttpResponse.h"
+#include "ThreadPool.h"
 
 struct HttpTask{
 
   std::shared_ptr<Connection> conn_;
   std::string request_data_;
-  std::function<void(std::string)> complate_callback_;
-  
 };
 
 class HttpServer{
@@ -27,6 +26,7 @@ private:
   TcpServer tcpServer_;
   HttpParser parser_;
   UrlResponse url_handles_;
+  ThreadPool thread_pool_;
 
 public:
   HttpServer(int port);
@@ -38,6 +38,7 @@ public:
 
 private:
   void onMessage(std::shared_ptr<Connection> conn, const std::string& raw_data);
+  void processRequest(HttpTask task);
 
 };
 
