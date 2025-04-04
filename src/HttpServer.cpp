@@ -33,7 +33,7 @@ void HttpServer::processRequest(HttpTask task){
 
     HttpRequest request = parser_.getHttpRequest();
 
-    auto it = url_handles_.find(request.uri_);
+    /*auto it = url_handles_.find(request.uri_);
     if( it != url_handles_.end() ){
 
       HttpResponse response = it->second(request);
@@ -55,12 +55,24 @@ void HttpServer::processRequest(HttpTask task){
     response.setBody("Bad Request");
     task.conn_->appendToWriteBuffer(response.toString());
     if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
+  }*/
+  /*实现请求转发逻辑*/
+  std::string responseStr = forwardRequest(request);
+  task.conn_->appendToWriteBuffer(responseStr);
+  if( task.conn_->hasDataToWrite() ){
+    task.conn_->writeData();
+  }else{
+    HttpResponse response;
+    response.setStatusCode(404);
+    response.setBody("Bad Request");
+    task.conn_->appendToWriteBuffer(response.toString());
+    if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
   }
 }
 
 std::string HttpServer::forwardRequest(const HttpRequest& request){
 
-  
+
 }
 
 
