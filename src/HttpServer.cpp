@@ -72,7 +72,11 @@ void HttpServer::processRequest(HttpTask task){
 
 std::string HttpServer::forwardRequest(const HttpRequest& request){
 
+  //构建新的HTTP请求
+  std::string newRequest = buildForwardRequest(request);
 
+  //发送到后端服务器并获取响应
+  return backend_server_.sendRequest(newRequest);
 }
 
 
