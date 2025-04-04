@@ -12,7 +12,7 @@
 class BackendServer{
 
 private:
-  std::string ip_;
+  std::string host_;
   int port_;
 
 public:
@@ -24,8 +24,12 @@ public:
   int getPort() const;
 
   ~BackendServer();
-};
 
+private:
+  bool connectServer(const int& fd);
+  std::string readBuffer(const int& fd);
+
+};
 
 
 #endif
