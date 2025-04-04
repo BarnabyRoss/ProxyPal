@@ -1,7 +1,7 @@
 
 #include "HttpServer.h"
 
-HttpServer::HttpServer(int port, size_t threadCount) : tcpServer_(port), thread_pool_(threadCount){
+HttpServer::HttpServer(int port, const std::string& backendHost, int backendPort, size_t threadCount) : tcpServer_(port), backend_server_(backendHost, backendPort), thread_pool_(threadCount){
 
   tcpServer_.setMessageCallBack([this](std::shared_ptr<Connection> conn, const std::string& data){
     this->onMessage(conn, data);
@@ -56,6 +56,11 @@ void HttpServer::processRequest(HttpTask task){
     task.conn_->appendToWriteBuffer(response.toString());
     if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
   }
+}
+
+std::string HttpServer::forwardRequest(const HttpRequest& request){
+
+  
 }
 
 
