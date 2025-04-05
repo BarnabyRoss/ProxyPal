@@ -48,7 +48,21 @@ void HttpServer::processRequest(HttpTask task){
       response.setBody("Not Found");
       task.conn_->appendToWriteBuffer(response.toString());
       if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
+    }*/
+
+    /*实现请求转发逻辑*/
+    std::string responseStr = forwardRequest(request);
+    task.conn_->appendToWriteBuffer(responseStr);
+    if( task.conn_->hasDataToWrite() ){
+      task.conn_->writeData();
+    }else{
+      HttpResponse response;
+      response.setStatusCode(404);
+      response.setBody("Bad Request");
+      task.conn_->appendToWriteBuffer(response.toString());
+      if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
     }
+
   }else{
 
     HttpResponse response;
@@ -56,19 +70,8 @@ void HttpServer::processRequest(HttpTask task){
     response.setBody("Bad Request");
     task.conn_->appendToWriteBuffer(response.toString());
     if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
-  }*/
-  /*实现请求转发逻辑*/
-  std::string responseStr = forwardRequest(request);
-  task.conn_->appendToWriteBuffer(responseStr);
-  if( task.conn_->hasDataToWrite() ){
-    task.conn_->writeData();
-  }else{
-    HttpResponse response;
-    response.setStatusCode(404);
-    response.setBody("Bad Request");
-    task.conn_->appendToWriteBuffer(response.toString());
-    if( task.conn_->hasDataToWrite() ) task.conn_->writeData();
   }
+  
 }
 
 std::string HttpServer::forwardRequest(const HttpRequest& request){
@@ -82,9 +85,9 @@ std::string HttpServer::forwardRequest(const HttpRequest& request){
 
 std::string HttpServer::buildForwardRequest(const HttpRequest& request){
 
-  std::string forwardRequest = newRequest.method_ + " " + newRequest.uri_ + " " + newRequest.version_ + "\r\n";
+  std::string forwardRequest = request.method_ + " " + request.uri_ + " " + request.version_ + "\r\n";
 
-  for(const auto& header : headers_){
+  for(const auto& header : request.headers_){
     if( header.first != "Host" ){
       forwardRequest += header.first + ":" + header.second + "\r\n";
     }else{

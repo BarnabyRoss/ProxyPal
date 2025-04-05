@@ -94,7 +94,7 @@ public:
     if( getpeername(client_fd_, (struct sockaddr*)&addr, &addr_len ) == 0 ){
 
       char ip_str[INET_ADDRSTRLEN];
-      inet_ntop(AF_NET, &(addr.sin_addr), ip_str, INET_ADDRSTRLEN);
+      inet_ntop(AF_INET, &(addr.sin_addr), ip_str, INET_ADDRSTRLEN);
 
       return std::string(ip_str);
     }
