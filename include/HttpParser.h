@@ -14,6 +14,8 @@ std::string uri_;
 std::string version_;
 std::map<std::string, std::string> headers_;
 
+std::string client_ip_;  //保存解析后客户端的ip
+
 };
 
 class HttpParser{

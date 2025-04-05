@@ -87,6 +87,20 @@ public:
   void appendToWriteBuffer(const std::string& data) { write_buffer_ += data; }
   bool hasDataToWrite() const { return !write_buffer_.empty(); }
 
+  //Connection类中添加getClientIP方法用于获取连接过来的客户端IP
+  std::string getClientIP() const{
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    if( getpeername(client_fd_, (struct sockaddr*)&addr, &addr_len ) == 0 ){
+
+      char ip_str[INET_ADDRSTRLEN];
+      inet_ntop(AF_NET, &(addr.sin_addr), ip_str, INET_ADDRSTRLEN);
+
+      return std::string(ip_str);
+    }
+    return "Unknown";
+  }
+
   ~Connection(){
     if( client_fd_ != -1 ){
       close(client_fd_);
