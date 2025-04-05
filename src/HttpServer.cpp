@@ -32,6 +32,7 @@ void HttpServer::processRequest(HttpTask task){
   if( parser_.parseRequest(task.request_data_)){
 
     HttpRequest request = parser_.getHttpRequest();
+    request.client_ip_ = task.conn_->getClientIP();
 
     /*auto it = url_handles_.find(request.uri_);
     if( it != url_handles_.end() ){
@@ -77,6 +78,26 @@ std::string HttpServer::forwardRequest(const HttpRequest& request){
 
   //发送到后端服务器并获取响应
   return backend_server_.sendRequest(newRequest);
+}
+
+std::string HttpServer::buildForwardRequest(const HttpRequest& request){
+
+  std::string forwardRequest = newRequest.method_ + " " + newRequest.uri_ + " " + newRequest.version_ + "\r\n";
+
+  for(const auto& header : headers_){
+    if( header.first != "Host" ){
+      forwardRequest += header.first + ":" + header.second + "\r\n";
+    }else{
+      forwardRequest += "Host: " + backend_server_.getHost() + ":" + std::to_string(backend_server_.getPort()) + "\r\n";
+    }
+  }
+
+  forwardRequest += "X-Forward-For:" + request.client_ip_ + "\r\n";
+
+  forwardRequest += "\r\n";
+
+  return forwardRequest;
+
 }
 
 

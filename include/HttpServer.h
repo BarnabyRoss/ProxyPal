@@ -43,6 +43,7 @@ private:
   void processRequest(HttpTask task);
   //新增：转发请求到后端服务器
   std::string forwardRequest(const HttpRequest& request);
+  std::string buildForwardRequest(const HttpRequest& request);
 
 };
 
