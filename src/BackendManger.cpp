@@ -70,17 +70,24 @@ bool BackendManger::checkConfigUpdate(){
     return false;
   }
   if( file_stat.st_mtime > last_modified_ ){
-    
+
     std::cout << "config file update..., reload.." << std::endl;
     return loadConfig();
   }
   return false;
 }
 
-//获取下一个后端服务器（负载均衡）
+//实现简单的轮询负载均衡
 std::shared_ptr<BackendServer> BackendManger::getNextBackend(){
 
+    std::lock_guard<std::mutex> lock(mutex_);
 
+    if( backends_.empty() ) return nullptr;
+
+    auto backend = backends_[current_index_];
+    current_index_ = (current_index_ + 1) % backends_.size();
+
+    return backend;
 }
 
 //发送请求到后端
