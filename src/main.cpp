@@ -4,10 +4,13 @@
 
 int main(int argc, char* argv[]){
 
-  HttpServer server(5000, "127.0.0.1", 5050);
+  int port = 5000;
+  std::string config_file = "etc/backend_servers.json";
+  size_t thread_count = 4;
+  //HttpServer server(5000, "127.0.0.1", 5050);
 
   // 用户注册URL处理函数
-  server.registerHandler("/", [](const HttpRequest& req) {
+  /*server.registerHandler("/", [](const HttpRequest& req) {
     HttpResponse resp;
     resp.setStatusCode(200);
     resp.setBody("<h1>Home Page</h1>");
@@ -19,10 +22,18 @@ int main(int argc, char* argv[]){
     resp.setStatusCode(200);
     resp.setBody("<h1>About Us</h1>");
     return resp;
-  });
+  });*/
 
-  // 启动服务器
-  server.start();
+  try{
+    HttpServer server(port, config_file, thread_count);
+    // 启动服务器
+    server.start();
+  }catch(const std::exception& e){
+    std::cerr << "Error: " << e.what() << cout << endl;
+    return 1;
+  }
+
+  
 
   return 0;
 }

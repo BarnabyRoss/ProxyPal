@@ -1,7 +1,8 @@
 
 #include "HttpServer.h"
 
-HttpServer::HttpServer(int port, const std::string& backendHost, int backendPort, size_t threadCount) : tcpServer_(port), backend_server_(backendHost, backendPort), thread_pool_(threadCount){
+HttpServer::HttpServer(int port, const std::string& config_file, size_t threadCount) : tcpServer_(port), 
+           backend_manager_(config_file), thread_pool_(threadCount){
 
   tcpServer_.setMessageCallBack([this](std::shared_ptr<Connection> conn, const std::string& data){
     this->onMessage(conn, data);
@@ -80,7 +81,8 @@ std::string HttpServer::forwardRequest(const HttpRequest& request){
   std::string newRequest = buildForwardRequest(request);
 
   //发送到后端服务器并获取响应
-  return backend_server_.sendRequest(newRequest);
+  //return backend_server_.sendRequest(newRequest);
+  return backend_manager_.sendRequest(newRequest);
 }
 
 std::string HttpServer::buildForwardRequest(const HttpRequest& request){

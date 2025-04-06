@@ -11,6 +11,7 @@
 #include "HttpResponse.h"
 #include "ThreadPool.h"
 #include "BackendServer.h"
+#include "BackendManger.h"
 
 struct HttpTask{
 
@@ -28,10 +29,11 @@ private:
   HttpParser parser_;
   UrlResponse url_handles_;
   ThreadPool thread_pool_;
-  BackendServer backend_server_; //增加连接后端服务器对象
+  //BackendServer backend_server_; //增加连接后端服务器对象
+  BackendManger backend_manager_;
 
 public:
-  HttpServer(int port, const std::string& backendHost, int backendPort, size_t threadCount = 4); //添加后端服务器构造参数
+  HttpServer(int port, const std::string& config_file, size_t threadCount = 4); //添加后端服务器构造参数
 
   void start();
   void registerHandler(const std::string& path, std::function<HttpResponse(const HttpRequest&)> handler);
