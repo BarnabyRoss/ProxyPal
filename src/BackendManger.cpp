@@ -65,7 +65,16 @@ bool BackendManger::loadConfig(){
 //检查配置文件是否更新
 bool BackendManger::checkConfigUpdate(){
 
-
+  struct stat file_stat;
+  if( stat(config_file_.c_str(), &file_stat) != 0 ){
+    return false;
+  }
+  if( file_stat.st_mtime > last_modified_ ){
+    
+    std::cout << "config file update..., reload.." << std::endl;
+    return loadConfig();
+  }
+  return false;
 }
 
 //获取下一个后端服务器（负载均衡）
