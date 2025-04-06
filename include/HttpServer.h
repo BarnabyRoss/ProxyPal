@@ -47,6 +47,9 @@ private:
   std::string forwardRequest(const HttpRequest& request);
   std::string buildForwardRequest(const HttpRequest& request);
 
+  //定期检查配置更新
+  void checkConfigPeriodically();
+
 };
 
 

@@ -11,6 +11,10 @@ HttpServer::HttpServer(int port, const std::string& config_file, size_t threadCo
 
 void HttpServer::start(){
 
+  //启动配置检查线程
+  std::thread config_checker(&HttpServer::checkConfigPeriodically, this);
+  config_checker.detach();
+
   tcpServer_.start();
 }
 
@@ -103,6 +107,16 @@ std::string HttpServer::buildForwardRequest(const HttpRequest& request){
 
   return forwardRequest;
 
+}
+
+//定期检查配置更新
+void HttpServer::checkConfigPeriodically(){
+
+  while( true ){
+
+    std::this_thread::sleep_for(std::chrono::seconds(60));
+    backend_manager_.checkConfigUpdate();
+  }
 }
 
 
