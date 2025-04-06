@@ -6,9 +6,9 @@
 
 using json = nlohmann::json;
 
-BackendManger::BackendManger(const std::string& config_file){
+BackendManger::BackendManger(const std::string& config_file) : config_file_(config_file), current_index_(0){
 
-
+  loadConfig();
 }
 
   //加载配置文件
@@ -93,7 +93,15 @@ std::shared_ptr<BackendServer> BackendManger::getNextBackend(){
 //发送请求到后端
 std::string BackendManger::sendRequest(const std::string& request){
 
+  checkConfigUpdate();
 
+  //获取一个后端服务器
+  auto backend = getNextBackend();
+  if( !backend ){
+    return "HTTP/1.1 503 Service Unavailable\r\n\r\nNo backend service available\r\n";
+  }
+
+  return backend->sendRequest(request);
 }
 
 
