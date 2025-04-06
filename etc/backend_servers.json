@@ -1,0 +1,25 @@
+
+{
+"backends":[
+
+  {
+    "ip": "127.0.0.1",
+    "port": 5050,
+    "weight": 5
+  },
+
+  {
+    "ip": "127.0.0.1",
+    "prot": 5060,
+    "weight": 3
+  }
+
+],
+
+"load_balance_strategy": "round_robin",
+
+"check_interval_seconds": 60
+
+}
+
+
