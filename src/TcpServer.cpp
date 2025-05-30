@@ -176,18 +176,27 @@ void TcpServer::handleRead(int fd){
 
 void TcpServer::handleWrite(int fd){
 
-  auto it = connections_.find(fd);
+  auto it = connections_.find(fd);  //1.查找连接对象
   if( it == connections_.end() ) return;
 
   std::shared_ptr<Connection> conn = it->second;
 
-  if( !conn->writeData() ){
-    removeConnection(fd);
-    return;
+  if( !conn->writeData() ){  //2.调用 Connection 对象的 writeData 方法发送数据
+    removeConnection(fd);  //如果 writeData 返回 false (发送失败或连接关闭)
+    return;   //则移除连接并返回
+  }
+
+  //3.如果数据发送完毕，应该修改 epoll 监听，移除 EPOLLOUT
+  if( conn->write_buffer_.empty() ){
+
+    struct epoll_event ev;
+    ev.events = EPOLLIN;  //只关心读事件
+    ev.data.fd = fd;
+    epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, fd, &ev);
   }
 }
 
 void TcpServer::handleError(int fd){
 
-  removeConnection(fd);
+  removeConnection(fd); //直接移除并清理发生错误的连接
 }
