@@ -5,7 +5,7 @@ HttpServer::HttpServer(int port, const std::string& config_file, size_t threadCo
            backend_manager_(config_file), thread_pool_(threadCount){
 
   tcpServer_.setMessageCallBack([this](std::shared_ptr<Connection> conn, const std::string& data){
-    this->onMessage(conn, data);
+    this->onMessage(conn, data); 
   });
 }
 
@@ -81,26 +81,41 @@ void HttpServer::processRequest(HttpTask task){
 
 std::string HttpServer::forwardRequest(const HttpRequest& request){
 
-  //构建新的HTTP请求
-  std::string newRequest = buildForwardRequest(request);
+  //1.从 BackendManger 获取下一个目标后端服务器
+  std::shared_ptr<BackendServer> target_backend = backend_manager_.getNextBackend();
+  // 2. 检查是否成功获取到后端服务器
+    if (!target_backend) {
+        // 如果没有可用的后端服务器，返回 503 Service Unavailable
+        std::string error_response = "HTTP/1.1 503 Service Unavailable\r\n";
+        error_response += "Content-Type: text/plain\r\n";
+        error_response += "Content-Length: 29\r\n"; // "No backend service available" 的长度
+        error_response += "Connection: close\r\n\r\n";
+        error_response += "No backend service available";
+        return error_response;
+    }
 
-  //发送到后端服务器并获取响应
-  //return backend_server_.sendRequest(newRequest);
+  //3.使用目标后端服务器的 IP (host) 和端口构建新的 HTTP 请求字符串
+  std::string newRequest = buildForwardRequest(request, target_backend->getHost(), target_backend->getPort());
+
+  //4.直接调用目标后端服务器实例的 sendRequest 方法发送请求并获取响应
   return backend_manager_.sendRequest(newRequest);
 }
 
-std::string HttpServer::buildForwardRequest(const HttpRequest& request){
+std::string HttpServer::buildForwardRequest(const HttpRequest& request, const std::string& backend_host, int backend_port){
 
   std::string forwardRequest = request.method_ + " " + request.uri_ + " " + request.version_ + "\r\n";
 
+  //复制原始请求的大部分头部
   for(const auto& header : request.headers_){
     if( header.first != "Host" ){
       forwardRequest += header.first + ":" + header.second + "\r\n";
     }else{
-      forwardRequest += "Host: " + backend_server_.getHost() + ":" + std::to_string(backend_server_.getPort()) + "\r\n";
+      //设置指向目标后端服务器的 Host 头部
+      forwardRequest += "Host: " + backend_host + ":" + std::to_string(backend_port) + "\r\n";
     }
   }
 
+  //添加 X-Forwarded-For 头部，传递原始客户端 IP
   forwardRequest += "X-Forward-For:" + request.client_ip_ + "\r\n";
 
   forwardRequest += "\r\n";
